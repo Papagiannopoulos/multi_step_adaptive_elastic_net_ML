@@ -1,6 +1,6 @@
 ## Sex-specific metabolic signatures of adiposity associated with clinical biomarkers in the UK Biobank
 
-These are scripts of my first PhD project. 
+These are scripts of my first PhD project. /n
 In this research I identified Metabolic Signatures (MSs) of eight adiposity indices using a multi-step estimation algorithm built upon adaptive elastic-net regularization with stability selection. This machine learning model reduces potential false positives and improves the stability of feature selection, while maintaining the estimation accuracy. The associations between MSs and clinical biomarkers performed applying multivariate linear regression models adjusted for covariates.
 This research could advance the understanding of the pathophysiology of regional and overall obesity and provide insights into the molecular mechanisms by which adiposity affects health, offering potential directions for future pharmacological or lifestyle interventions.
 
