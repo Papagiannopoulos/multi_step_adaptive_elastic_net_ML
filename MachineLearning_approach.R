@@ -1,16 +1,17 @@
 
 ##### Stability Selection #####
 set.seed(3487)
+#Parallelization
 cl <- makeCluster(detectCores() - 2)
 registerDoParallel(cl)
 registerDoRNG(seed = 23423)
 
 features <- list()
-N <- 100
+N <- 100#Number of Splits
+#Hyperparameters
 steps <- 5
 criteria <- c("lambda.1se","lambda.min")
 gamma <- c(0.1,0.5,1,1.5,2,2.5,3)
-
 for(p in 1:length(y)){
   print(p)
   set.seed(572920)
@@ -20,7 +21,6 @@ for(p in 1:length(y)){
     print(j)
     train_rows <- metaboRank$my_var %>% createDataPartition(p = 0.80, list = F)
     train <- metaboRank[train_rows,]
-    test <- metaboRank[-train_rows,]
     
     x1 <- sample(criteria, 1, replace = T)
     x2 <- sample(gamma, 1, replace = T)
@@ -44,7 +44,7 @@ stopCluster(cl)
 
 ##### Tuning #####
 set.seed(34587)
-
+#Parallelization
 cl <- makeCluster(detectCores() - 2)
 registerDoParallel(cl)
 registerDoRNG(seed = 23423)
@@ -53,11 +53,10 @@ msanet <- list()
 msanet_rmse <- list()
 msanet_pearson <- list()
 test <- list(); tune <- list()
-
+#Hyperparameters
 steps <- 5
 criteria <- c("lambda.1se","lambda.min")
 gamma <- c(0.1, 0.5, 1, 1.5, 1.8, 2, 2.5, 3)
-
 for(p in 1:length(y)){
   set.seed(17997)
   tune[[p]] <- matrix(NA,ncol = length(criteria), nrow = length(gamma))
@@ -108,17 +107,16 @@ for(p in 1:length(tune)){
 }
 write.xlsx(save_tuning, "full_tuning_male.xlsx",row.names = F, showNA = F, col.names = T)
 
-##### Tuning Figures #####
+##### Tuning - Figures #####
 save_tuning <- as.data.frame(read_excel("full_tuning_male.xlsx"))
 save_tuning <- reshape(save_tuning, direction = "long", idvar = "id", timevar = "criteria", varying = list(c(1,5),c(2,6),c(3,7),c(4,8)),
                        v.names = c("rmse","pearson","df","ratio"), sep = "_")
 save_tuning <- save_tuning[!grepl("Resid",save_tuning$var),]
 save_tuning <- data.frame(save_tuning,gamma = rep(gamma,length(y)))
 save_tuning$criteria <- factor(save_tuning$criteria, c(1,2),c("Lambda 1sd","Lambda min"))
-
+#Candidate Hyperparameters
 row <- c(6,4,7,7,5,6,8,6)
 col <- c(1,1,2,1,1,2,2,2)
-
 gtune <- list()
 for(p in 1:length(y)){
   g1 <- ggplot(save_tuning[save_tuning$var %in% names(y)[p],], aes(x=gamma, y=rmse, colour = criteria)) + geom_point(cex = 5) + 
@@ -155,10 +153,12 @@ ggarrange(gtune[[1]],gtune[[5]],gtune[[2]],gtune[[6]],gtune[[3]],
           gtune[[7]],gtune[[4]],gtune[[8]],nrow = 4, ncol = 2)
 
 ##### Final Model & Save Results #####
+#Best Hyperparameters
 row <- c(6,4,7,7,5,6,8,6)
 col <- c(1,1,2,1,1,2,2,2)
 
 set.seed(67489)
+#Parallelization
 cl <- makeCluster(detectCores() - 2)
 registerDoParallel(cl)
 registerDoRNG(seed = 9401)
@@ -168,7 +168,7 @@ msanet_rmse <- list()
 msanet_pearson <- list()
 test <- list()
 metrics <- list()
-N <- 100
+N <- 100#Bootstrapping
 coeff <- list()
 for(p in 1:length(y)){
   print(p)
