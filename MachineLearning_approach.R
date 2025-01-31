@@ -1,21 +1,56 @@
 
-#Libraries
+# Libraries
 library(readr); library(readxl); library(xlsx)
 library(caret); library(msaenet)#MULTI STEP ADAPTIVE ELASTIC NET
 library(dplyr); library(purrr)
 library(ggplot2); library(ggpubr); 
 library(doParallel); library(parallel); library(doRNG)#For Parallelization
 
+metaboRank <- read_excel("")
+y <- read_excel("")
+
+# Structure of the used data sets
+# 1) metaboRank: Metabolimics Data Frame
+str(metaboRank)
+# data.frame:	~150,000 obs. of  250 variables:
+# my_var    : num  0.983 0.137 1.073 0.317 -0.133 ...
+# X23400.0.0: num  1.3303 0.0362 -0.0591 -0.8152 1.4455 ...
+# X23401.0.0: num  0.93 -0.111 -0.342 -0.892 1.363 ...
+# X23402.0.0: num  1.12 -0.245 -0.432 -0.78 1.121 ...
+# X23403.0.0: num  0.689 -0.657 -0.571 -0.602 0.773 ...
+# X23404.0.0: num  0.8893 0.0822 -0.3364 -1.0878 1.513 ...
+# X23405.0.0: num  0.7212 0.0154 -0.2438 -0.9506 1.5361 ...
+# X23406.0.0: num  1.538 0.615 0.916 0.172 0.729 ...
+# X23407.0.0: num  -0.0708 -1.378 -0.5791 0.2737 0.0938 ...
+# .
+# .
+# .
+
+# 2) y: Adiposity Data Frame
+str(y)
+# data.frame:	70591 obs. of  8 variables:
+# Body Fat          : num  0.983 0.137 1.073 0.317 -0.133 ...
+# Waist             : num  -0.8231 -0.0584 0.5151 0.993 -0.7275 ...
+# Hip               : num  -1.876 0.294 0.873 1.018 0.149 ...
+# Wasit to Hip Ratio: num  0.6341 -0.3614 -0.0101 0.5854 -1.3039 ...
+# BMI               : num  -0.619 -0.431 0.296 0.228 -0.626 ...
+# ABSI              : num  -0.00178 1.0246 0.41346 1.41344 -0.17265 ...
+# HI                : num  -1.672 1.958 0.981 1.169 1.915 ...
+# WHI               : num  1.206 -0.196 -0.229 0.551 -1.263 ...
+# .
+# .
+# .
+
 ##### Stability Selection #####
 set.seed(3487)
-#Parallelization
+# Parallelization
 cl <- makeCluster(detectCores() - 2)
 registerDoParallel(cl)
 registerDoRNG(seed = 23423)
 
 features <- list()
-N <- 100#Number of Splits
-#Hyperparameters
+N <- 100 # Number of Splits
+# Hyperparameters
 steps <- 5
 criteria <- c("lambda.1se","lambda.min")
 gamma <- c(0.1,0.5,1,1.5,2,2.5,3)
@@ -51,7 +86,7 @@ stopCluster(cl)
 
 ##### Tuning #####
 set.seed(34587)
-#Parallelization
+# Parallelization
 cl <- makeCluster(detectCores() - 2)
 registerDoParallel(cl)
 registerDoRNG(seed = 23423)
@@ -60,7 +95,7 @@ msanet <- list()
 msanet_rmse <- list()
 msanet_pearson <- list()
 test <- list(); tune <- list()
-#Hyperparameters
+# Hyperparameters
 steps <- 5
 criteria <- c("lambda.1se","lambda.min")
 gamma <- c(0.1, 0.5, 1, 1.5, 1.8, 2, 2.5, 3)
@@ -95,7 +130,7 @@ for(p in 1:length(y)){
 }
 stopCluster(cl)
 
-#Save Tuning results
+# Save Tuning results
 save_tuning <- data.frame()
 tune_parametrs <- list()
 for(p in 1:length(tune)){
@@ -121,16 +156,16 @@ save_tuning <- reshape(save_tuning, direction = "long", idvar = "id", timevar = 
 save_tuning <- save_tuning[!grepl("Resid",save_tuning$var),]
 save_tuning <- data.frame(save_tuning,gamma = rep(gamma,length(y)))
 save_tuning$criteria <- factor(save_tuning$criteria, c(1,2),c("Lambda 1sd","Lambda min"))
-#Candidate Hyperparameters
+# Candidate Hyperparameters
 row <- c(6,4,7,7,5,6,8,6)
 col <- c(1,1,2,1,1,2,2,2)
 gtune <- list()
 for(p in 1:length(y)){
   g1 <- ggplot(save_tuning[save_tuning$var %in% names(y)[p],], aes(x=gamma, y=rmse, colour = criteria)) + geom_point(cex = 5) + 
-    labs(x="", y="RMSE", title = abr_adiposity[p])+ #guides(fill = "", colour = "")+
+    labs(x="", y="RMSE", title = abr_adiposity[p])+ 
     theme_bw()+ theme(plot.title = element_text(size=15),axis.text.x= element_text(size=8),
                       axis.text.y= element_text(size=12), axis.title=element_text(size=12))+
-    geom_line(lwd = 1.5)+scale_x_continuous(breaks = gamma, limits = c(0,3.3))+geom_text(aes(label = df), size = 5, col = "red")+#, hjust = rep(c(-2,2),each=7), vjust = rep(c(-1,1),each=7))+
+    geom_line(lwd = 1.5)+scale_x_continuous(breaks = gamma, limits = c(0,3.3))+geom_text(aes(label = df), size = 5, col = "red")+
     guides(size = "none", color = "none")+ylim(c(min(save_tuning[save_tuning$var %in% names(y)[p],]$rmse,na.rm = T)*0.95,
                                                  max(save_tuning[save_tuning$var %in% names(y)[p],]$rmse,na.rm = T)*1.02))+
     annotate("label",x = save_tuning[save_tuning$var %in% names(y)[p],][save_tuning[save_tuning$var %in% names(y)[p],]$criteria %in% levels(save_tuning$criteria)[col[p]],8][row[p]],
@@ -142,7 +177,7 @@ for(p in 1:length(y)){
     theme_bw()+ theme(plot.title = element_text(size=15),axis.text.x= element_text(size=8),
                       axis.text.y= element_text(size=12), axis.title=element_text(size=12))+
     geom_line(lwd = 1.5)+scale_x_continuous(breaks = gamma, limits = c(0,3.3))+guides(size = "none", color = "none")+
-    geom_text(aes(label = df, size = 5), col = "red")+#, hjust = rep(c(-2,2),each = 7), vjust = rep(c(-1,1),each=7))+
+    geom_text(aes(label = df, size = 5), col = "red")+
     ylim(c(min(save_tuning[save_tuning$var %in% names(y)[p],]$pearson)*0.97,
            max(save_tuning[save_tuning$var %in% names(y)[p],]$pearson)*1.03))+
     annotate("label",x = save_tuning[save_tuning$var %in% names(y)[p],][save_tuning[save_tuning$var %in% names(y)[p],]$criteria %in% levels(save_tuning$criteria)[col[p]],8][row[p]],
@@ -160,12 +195,12 @@ ggarrange(gtune[[1]],gtune[[5]],gtune[[2]],gtune[[6]],gtune[[3]],
           gtune[[7]],gtune[[4]],gtune[[8]],nrow = 4, ncol = 2)
 
 ##### Final Model & Save Results #####
-#Best Hyperparameters
+# Best Hyperparameters
 row <- c(6,4,7,7,5,6,8,6)
 col <- c(1,1,2,1,1,2,2,2)
 
 set.seed(67489)
-#Parallelization
+# Parallelization
 cl <- makeCluster(detectCores() - 2)
 registerDoParallel(cl)
 registerDoRNG(seed = 9401)
@@ -175,7 +210,7 @@ msanet_rmse <- list()
 msanet_pearson <- list()
 test <- list()
 metrics <- list()
-N <- 100#Bootstrapping
+N <- 100 # Bootstrapping
 coeff <- list()
 for(p in 1:length(y)){
   print(p)
@@ -196,10 +231,10 @@ for(p in 1:length(y)){
                            rule = criteria[col[p]],alphas = seq(0.1,1,0.1),verbose = T,
                            parallel = T,scale = gamma[row[p]],seed = T,nsteps = steps,tune.nsteps = "max")
     
-    #Metrics
+    # Metrics
     msanet_rmse[[p]] <- c(msanet_rmse[[p]],RMSE(test[,match("my_var",names(test))],predict(msanet[[p]],newx=as.matrix(test[,-match("my_var",names(test))]))))
     msanet_pearson[[p]] <- c(msanet_pearson[[p]],cor.test(test[,match("my_var",names(test))],predict(msanet[[p]],newx=as.matrix(test[,-match("my_var",names(test))])))$est)
-    #Coefficients
+    # Coefficients
     cc <- data.frame(names = rownames(msanet[[p]]$beta),coef1 = msanet[[p]]$beta[,1])
     cc <-  cc[cc$coef1 != 0,]
     
