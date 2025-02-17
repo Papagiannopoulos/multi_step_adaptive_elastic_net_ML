@@ -10,7 +10,7 @@ metaboRank <- read_excel("")
 y <- read_excel("")
 
 # Structure of the used data sets
-# 1) metaboRank: Metabolimics Data Frame
+# 1) metaboRank: Metabolomics Data Frame
 str(metaboRank)
 # data.frame:	~150,000 obs. of  250 variables:
 # my_var    : num  0.983 0.137 1.073 0.317 -0.133 ...
@@ -40,6 +40,8 @@ str(y)
 # .
 # .
 # .
+
+# 3) abr_adiposity <- c("BF%","WC","HC","WHR","BMI","ABSI","HI", "WHI")
 
 ##### Stability Selection #####
 set.seed(3487)
@@ -78,8 +80,8 @@ for(p in 1:length(y)){
   }
   features[[p]] <- data.frame(Feature = names(table(features[[p]])), Counts = as.numeric(table(features[[p]])))
   features[[p]] <- arrange(features[[p]], desc(Counts))
-  features[[p]]$Abr <- UKB_abr$Metabolite[match(features[[p]]$Feature, UKB_abr$data_field)]
-  
+
+  if(!dir.exists("FS")){ dir.create("FS")}
   write.xlsx(features[[p]], paste0("FS/",names(y)[p],"_Feature_Selection_for.xlsx"), row.names = F, showNA = F)
 }
 stopCluster(cl)
@@ -241,8 +243,10 @@ for(p in 1:length(y)){
     coeff[[p]]  <- merge(coeff[[p]], cc, by = "names", all = T)
     names(coeff[[p]])[length(coeff[[p]])] <- paste0("Iter",i)
   }
+
+  if(!dir.exists("coef_profiles")){ dir.create("coef_profiles")}
   write.xlsx(coeff[[p]], paste0("coef_profiles/Coef_N100_",names(y)[p],".xlsx"))
-  write.xlsx(msanet_rmse[[p]], paste0("coef_profiles/Performance_metrics/RMSE_N100_",names(y)[p],".xlsx"))
-  write.xlsx(msanet_pearson[[p]], paste0("coef_profiles/Performance_metrics/Pearson_N100_",names(y)[p],".xlsx"))
+  write.xlsx(msanet_rmse[[p]], paste0("coef_profiles/RMSE_N100_",names(y)[p],".xlsx"))
+  write.xlsx(msanet_pearson[[p]], paste0("coef_profiles/Pearson_N100_",names(y)[p],".xlsx"))
 }
 stopCluster(cl)
