@@ -7,7 +7,7 @@ This model reduces potential false positives and improves the stability of featu
 
 This research could advance the understanding of the pathophysiology of regional and overall obesity and provide insights into the molecular mechanisms through which adiposity impacts health, offering potential directions for future pharmacological or lifestyle interventions.
 
-#### More details about this research can be found on its pre-print form, which is published in [medRxiv](doi: https://doi.org/10.1101/2025.01.23.25321010)
+#### More details about this research can be found on its pre-print form, which is published in [medRxiv](https://doi.org/10.1101/2025.01.23.25321010)
 
 ### Acknowledgement
 This research has been conducted using the UK Biobank Resource under specific Application Number. 
