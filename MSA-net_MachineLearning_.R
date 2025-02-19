@@ -44,6 +44,9 @@ str(y)
 # 3) abr_adiposity <- c("BF%","WC","HC","WHR","BMI","ABSI","HI", "WHI")
 
 ##### Stability Selection #####
+#> In this step, if the code crashes
+#> probably user should change hyperparameters range!
+#> 
 set.seed(3487)
 # Parallelization
 cl <- makeCluster(detectCores() - 2)
@@ -159,6 +162,8 @@ save_tuning <- save_tuning[!grepl("Resid",save_tuning$var),]
 save_tuning <- data.frame(save_tuning,gamma = rep(gamma,length(y)))
 save_tuning$criteria <- factor(save_tuning$criteria, c(1,2),c("Lambda 1sd","Lambda min"))
 # Candidate Hyperparameters
+#> After vizualizations of tuning, user shoud decide about the optimal hyperparameters (based on RMSE & Pearson metrics)
+#> and assign their position in the following "row" & "col" elements
 row <- c(6,4,7,7,5,6,8,6)
 col <- c(1,1,2,1,1,2,2,2)
 gtune <- list()
@@ -193,10 +198,13 @@ for(p in 1:length(y)){
   }
   gtune[[p]]
 }
+#> The length of the following ggarrange plot should equals the length of y element
 ggarrange(gtune[[1]],gtune[[5]],gtune[[2]],gtune[[6]],gtune[[3]],
           gtune[[7]],gtune[[4]],gtune[[8]],nrow = 4, ncol = 2)
 
 ##### Final Model & Save Results #####
+#> After vizualizations of tuning, user shoud decide about the optimal hyperparameters (based on RMSE & Pearson metrics)
+#> and assign their position in the following "row" & "col" elements
 # Best Hyperparameters
 row <- c(6,4,7,7,5,6,8,6)
 col <- c(1,1,2,1,1,2,2,2)
