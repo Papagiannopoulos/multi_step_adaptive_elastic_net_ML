@@ -16,7 +16,7 @@ library(MASS); library(splitstackshape)
 #y <- read_excel("")
 
 # 1) y: Adiposity Data Frame (Y: Feature)
-str(y)
+#str(y)
 # data.frame:	70591 obs. of  8 variables:
 # Body Fat          : num  0.983 0.137 1.073 0.317 -0.133 ...
 # Waist             : num  -0.8231 -0.0584 0.5151 0.993 -0.7275 ...
@@ -32,7 +32,7 @@ str(y)
 
 # Structure of the used data sets
 # 2) metaboRank: Metabolomics Data Frame (X: Features)
-str(metaboRank)
+#str(metaboRank)
 # data.frame:	~150,000 obs. of  250 variables:
 # my_var    : num  0.983 0.137 1.073 0.317 -0.133 ...
 # X23400.0.0: num  1.3303 0.0362 -0.0591 -0.8152 1.4455 ...
