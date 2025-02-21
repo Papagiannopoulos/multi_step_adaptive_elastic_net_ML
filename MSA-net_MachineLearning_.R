@@ -1,16 +1,37 @@
 
+#> To run this script, user will need 3 input file names:
+#> 1) y
+#> 2) metaboRank
+#> 3) abr_adiposity
+#> 
 # Libraries
 library(readr); library(readxl); library(xlsx)
 library(caret); library(msaenet)#MULTI STEP ADAPTIVE ELASTIC NET
 library(dplyr); library(purrr)
 library(ggplot2); library(ggpubr); 
 library(doParallel); library(parallel); library(doRNG)#For Parallelization
+library(MASS); library(splitstackshape)
 
-metaboRank <- read_excel("")
-y <- read_excel("")
+#metaboRank <- read_excel("")
+#y <- read_excel("")
+
+# 1) y: Adiposity Data Frame (Y: Feature)
+str(y)
+# data.frame:	70591 obs. of  8 variables:
+# Body Fat          : num  0.983 0.137 1.073 0.317 -0.133 ...
+# Waist             : num  -0.8231 -0.0584 0.5151 0.993 -0.7275 ...
+# Hip               : num  -1.876 0.294 0.873 1.018 0.149 ...
+# Wasit to Hip Ratio: num  0.6341 -0.3614 -0.0101 0.5854 -1.3039 ...
+# BMI               : num  -0.619 -0.431 0.296 0.228 -0.626 ...
+# ABSI              : num  -0.00178 1.0246 0.41346 1.41344 -0.17265 ...
+# HI                : num  -1.672 1.958 0.981 1.169 1.915 ...
+# WHI               : num  1.206 -0.196 -0.229 0.551 -1.263 ...
+# .
+# .
+# .
 
 # Structure of the used data sets
-# 1) metaboRank: Metabolomics Data Frame
+# 2) metaboRank: Metabolomics Data Frame (X: Features)
 str(metaboRank)
 # data.frame:	~150,000 obs. of  250 variables:
 # my_var    : num  0.983 0.137 1.073 0.317 -0.133 ...
@@ -26,22 +47,22 @@ str(metaboRank)
 # .
 # .
 
-# 2) y: Adiposity Data Frame
-str(y)
-# data.frame:	70591 obs. of  8 variables:
-# Body Fat          : num  0.983 0.137 1.073 0.317 -0.133 ...
-# Waist             : num  -0.8231 -0.0584 0.5151 0.993 -0.7275 ...
-# Hip               : num  -1.876 0.294 0.873 1.018 0.149 ...
-# Wasit to Hip Ratio: num  0.6341 -0.3614 -0.0101 0.5854 -1.3039 ...
-# BMI               : num  -0.619 -0.431 0.296 0.228 -0.626 ...
-# ABSI              : num  -0.00178 1.0246 0.41346 1.41344 -0.17265 ...
-# HI                : num  -1.672 1.958 0.981 1.169 1.915 ...
-# WHI               : num  1.206 -0.196 -0.229 0.551 -1.263 ...
-# .
-# .
-# .
+# 3) Abbreviations
+# abr_adiposity <- c("BF%","WC","HC","WHR","BMI","ABSI","HI", "WHI")
 
-# 3) abr_adiposity <- c("BF%","WC","HC","WHR","BMI","ABSI","HI", "WHI")
+#> For a better understading, i simulate data for the needed input files.
+#> Just manipulate your data in the respective format and run the code.
+
+set.seed(4423)
+mu <- rep(0, 4)
+Sigma <- var(matrix(c(1, .1, .9, .9, .1, 1, .9, .9, .9, .9, 1, .9, .9, .9, .9, 1), 4, 4))
+metaboRank <- data.frame(mvrnorm(10^3, mu, Sigma))
+
+y <- metaboRank[,c(1,1)] + rnorm(10^3, 1, 1)
+
+metaboRank <- data.frame(my_var = y[,1], metaboRank)
+
+abr_adiposity <- paste0(1:length(y), "X")
 
 ##### Stability Selection #####
 #> In this step, if the code crashes
@@ -100,10 +121,6 @@ msanet <- list()
 msanet_rmse <- list()
 msanet_pearson <- list()
 test <- list(); tune <- list()
-# Hyperparameters
-steps <- 5
-criteria <- c("lambda.1se","lambda.min")
-gamma <- c(0.1, 0.5, 1, 1.5, 1.8, 2, 2.5, 3)
 for(p in 1:length(y)){
   set.seed(17997)
   tune[[p]] <- matrix(NA,ncol = length(criteria), nrow = length(gamma))
@@ -118,8 +135,8 @@ for(p in 1:length(y)){
       
       metaboRank$my_var <- y[,p]
       train_rows <- metaboRank$my_var %>% createDataPartition(p = 0.80, list = F)
-      train <- metaboRank[train_rows,c(1,match(features$Feature[features$Counts >= 60], names(metaboRank)))]
-      test <- metaboRank[-train_rows,c(1,match(features$Feature[features$Counts >= 60], names(metaboRank)))]
+      train <- metaboRank[train_rows,c(1,match(features$Feature[features$Counts >= N*0.6], names(metaboRank)))]
+      test <- metaboRank[-train_rows,c(1,match(features$Feature[features$Counts >= N*0.6], names(metaboRank)))]
       
       msanet <- msaenet(as.matrix(train[,-match("my_var",names(train))]),train[,match("my_var",names(train))],
                         family = "gaussian",init = "enet",tune = "cv",nfolds = 10,
@@ -162,10 +179,11 @@ save_tuning <- save_tuning[!grepl("Resid",save_tuning$var),]
 save_tuning <- data.frame(save_tuning,gamma = rep(gamma,length(y)))
 save_tuning$criteria <- factor(save_tuning$criteria, c(1,2),c("Lambda 1sd","Lambda min"))
 # Candidate Hyperparameters
-#> After vizualizations of tuning, user shoud decide about the optimal hyperparameters (based on RMSE & Pearson metrics)
-#> and assign their position in the following "row" & "col" elements
-row <- c(6,4,7,7,5,6,8,6)
-col <- c(1,1,2,1,1,2,2,2)
+#> After visualizations of tuning, user should decide about the optimal hyperparameters (based on RMSE & Pearson metrics)
+#> and assign their position in the following "row" & "col" elements. Then rerun and save the graphs
+row <- sample(1:length(gamma), length(y), replace = T) # refer to gamma hyperparameters position. Its length equals the length of Y feature.
+col <-  sample(1:length(criteria), length(y), replace = T) # refer to criteria hyperparameters position. Its length equals the length of Y feature.
+
 gtune <- list()
 for(p in 1:length(y)){
   g1 <- ggplot(save_tuning[save_tuning$var %in% names(y)[p],], aes(x=gamma, y=rmse, colour = criteria)) + geom_point(cex = 5) + 
@@ -199,16 +217,10 @@ for(p in 1:length(y)){
   gtune[[p]]
 }
 #> The length of the following ggarrange plot should equals the length of y element
-ggarrange(gtune[[1]],gtune[[5]],gtune[[2]],gtune[[6]],gtune[[3]],
-          gtune[[7]],gtune[[4]],gtune[[8]],nrow = 4, ncol = 2)
+ggarrange(plotlist = gtune)
+ggsave("hypeparametres.png", dpi = 1000, width = 12, height = 8)
 
 ##### Final Model & Save Results #####
-#> After vizualizations of tuning, user shoud decide about the optimal hyperparameters (based on RMSE & Pearson metrics)
-#> and assign their position in the following "row" & "col" elements
-# Best Hyperparameters
-row <- c(6,4,7,7,5,6,8,6)
-col <- c(1,1,2,1,1,2,2,2)
-
 set.seed(67489)
 # Parallelization
 cl <- makeCluster(detectCores() - 2)
@@ -224,17 +236,17 @@ N <- 100 # Bootstrapping
 coeff <- list()
 for(p in 1:length(y)){
   print(p)
-  msanet_rmse[[p]] <- c()
-  msanet_pearson[[p]] <- c()
+  msanet_rmse[[p]] <- NA
+  msanet_pearson[[p]] <- NA
   coeff[[p]] <- data.frame()
   
   features <- read.xlsx(paste0("FS/",names(y)[p],"_Feature_Selection_for.xlsx"), sheetIndex = 1)
   metaboRank$my_var <- y[,p]
   for(i in 1:N){
-    print(paste0("N = ", p))
+    print(paste0("N = ", i))
     train_rows <- metaboRank$my_var %>% createDataPartition(p = 0.80, list = F)
-    train <- metaboRank[train_rows,c(1,match(features$Feature[features$Counts >= 60], names(metaboRank)))]
-    test <- metaboRank[-train_rows,c(1,match(features$Feature[features$Counts >= 60], names(metaboRank)))]
+    train <- metaboRank[train_rows,c(1,match(features$Feature[features$Counts >= N*0.6], names(metaboRank)))]
+    test <- metaboRank[-train_rows,c(1,match(features$Feature[features$Counts >= N*0.6], names(metaboRank)))]
     
     msanet[[p]] <- msaenet(as.matrix(train[,-match("my_var",names(train))]),train[,match("my_var",names(train))],
                            family = "gaussian",init = "enet",tune = "cv",nfolds = 10,
@@ -242,15 +254,20 @@ for(p in 1:length(y)){
                            parallel = T,scale = gamma[row[p]],seed = T,nsteps = steps,tune.nsteps = "max")
     
     # Metrics
-    msanet_rmse[[p]] <- c(msanet_rmse[[p]],RMSE(test[,match("my_var",names(test))],predict(msanet[[p]],newx=as.matrix(test[,-match("my_var",names(test))]))))
+    msanet_rmse[[p]] <- c(msanet_rmse[[p]], RMSE(test[,match("my_var",names(test))],predict(msanet[[p]],newx=as.matrix(test[,-match("my_var",names(test))]))))
     msanet_pearson[[p]] <- c(msanet_pearson[[p]],cor.test(test[,match("my_var",names(test))],predict(msanet[[p]],newx=as.matrix(test[,-match("my_var",names(test))])))$est)
     # Coefficients
     cc <- data.frame(names = rownames(msanet[[p]]$beta),coef1 = msanet[[p]]$beta[,1])
     cc <-  cc[cc$coef1 != 0,]
     
-    coeff[[p]]  <- merge(coeff[[p]], cc, by = "names", all = T)
-    names(coeff[[p]])[length(coeff[[p]])] <- paste0("Iter",i)
-  }
+   if(i == 1){
+     coeff[[p]]  <- data.frame(cc)
+     names(coeff[[p]])[length(coeff[[p]])] <- paste0("Iter",i)
+   }else{
+     coeff[[p]]  <- merge(coeff[[p]], cc, by = "names", all = T)
+     names(coeff[[p]])[length(coeff[[p]])] <- paste0("Iter",i)
+   }
+}
 
   if(!dir.exists("coef_profiles")){ dir.create("coef_profiles")}
   write.xlsx(coeff[[p]], paste0("coef_profiles/Coef_N100_",names(y)[p],".xlsx"))
