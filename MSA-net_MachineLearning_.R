@@ -169,10 +169,10 @@ for(p in 1:length(tune)){
   
   save_tuning <- rbind(save_tuning,data.frame(d1,var = names(y)[p]))
 }
-write.xlsx(save_tuning, "full_tuning_male.xlsx",row.names = F, showNA = F, col.names = T)
+write.xlsx(save_tuning, "full_tuning.xlsx",row.names = F, showNA = F, col.names = T)
 
 ##### Tuning - Figures #####
-save_tuning <- as.data.frame(read_excel("full_tuning_male.xlsx"))
+save_tuning <- as.data.frame(read_excel("full_tuning.xlsx"))
 save_tuning <- reshape(save_tuning, direction = "long", idvar = "id", timevar = "criteria", varying = list(c(1,5),c(2,6),c(3,7),c(4,8)),
                        v.names = c("rmse","pearson","df","ratio"), sep = "_")
 save_tuning <- save_tuning[!grepl("Resid",save_tuning$var),]
