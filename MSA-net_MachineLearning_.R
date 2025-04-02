@@ -270,8 +270,8 @@ for(p in 1:length(y)){
 }
 
   if(!dir.exists("coef_profiles")){ dir.create("coef_profiles")}
-  write.xlsx(coeff[[p]], paste0("coef_profiles/Coef_N100_",names(y)[p],".xlsx"))
-  write.xlsx(msanet_rmse[[p]], paste0("coef_profiles/RMSE_N100_",names(y)[p],".xlsx"))
-  write.xlsx(msanet_pearson[[p]], paste0("coef_profiles/Pearson_N100_",names(y)[p],".xlsx"))
+  write.xlsx(coeff[[p]], paste0("coef_profiles/Coef_N100_",names(y)[p],".xlsx"), showNA = F)
+  write.xlsx(msanet_rmse[[p]], paste0("coef_profiles/RMSE_N100_",names(y)[p],".xlsx"), showNA = F)
+  write.xlsx(msanet_pearson[[p]], paste0("coef_profiles/Pearson_N100_",names(y)[p],".xlsx"), showNA = F)
 }
 stopCluster(cl)
