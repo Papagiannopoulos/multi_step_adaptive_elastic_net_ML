@@ -1,5 +1,5 @@
 
-#> To run this script, user will need 3 input file names:
+# To run this script, the user must provide three input files with the following names:
 #> 1) y
 #> 2) metaboRank
 #> 3) abr_adiposity
@@ -50,8 +50,8 @@ library(MASS); library(splitstackshape)
 # 3) Abbreviations
 # abr_adiposity <- c("BF%","WC","HC","WHR","BMI","ABSI","HI", "WHI")
 
-#> For a better understading, i simulate data for the needed input files.
-#> Just manipulate your data in the respective format and run the code.
+# For clarity, simulated data is provided to demonstrate the required input formats.
+# Replace the simulated data with your own data in the specified format before running the code.
 
 set.seed(4423)
 mu <- rep(0, 4)
@@ -65,8 +65,7 @@ metaboRank <- data.frame(my_var = y[,1], metaboRank)
 abr_adiposity <- paste0(1:length(y), "X")
 
 ##### Stability Selection #####
-#> In this step, if the code crashes
-#> probably user should change hyperparameters range!
+#> If the code crashes at this step, the user may need to adjust the hyperparameter ranges.
 #> 
 set.seed(3487)
 # Parallelization
@@ -179,8 +178,9 @@ save_tuning <- save_tuning[!grepl("Resid",save_tuning$var),]
 save_tuning <- data.frame(save_tuning,gamma = rep(gamma,length(y)))
 save_tuning$criteria <- factor(save_tuning$criteria, c(1,2),c("Lambda 1sd","Lambda min"))
 # Candidate Hyperparameters
-#> After visualizations of tuning, user should decide about the optimal hyperparameters (based on RMSE & Pearson metrics)
-#> and assign their position in the following "row" & "col" elements. Then rerun and save the graphs
+# After reviewing the tuning visualizations, the user should select the optimal hyperparameters
+# based on RMSE and Pearson metrics, assign their positions in the "row" and "col" variables,
+# then rerun the script to generate and save the updated graphs.
 row <- sample(1:length(gamma), length(y), replace = T) # refer to gamma hyperparameters position. Its length equals the length of Y feature.
 col <-  sample(1:length(criteria), length(y), replace = T) # refer to criteria hyperparameters position. Its length equals the length of Y feature.
 
