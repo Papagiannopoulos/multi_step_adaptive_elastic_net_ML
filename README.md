@@ -17,8 +17,10 @@ This research has been conducted using the UK Biobank Resource under **specific 
 Access to the UK Biobank is available through: **http://www.ukbiobank.ac.uk**
 
 ### 🔁 **Reproducibility**
-⚠️ Before running the ML script, run the requirements script to install all necessary libraries.  
-The script includes simulated data to demonstrate and reproduce the full machine learning workflow.
-🔔 ***Note***: R version: 4.4.1 (2024-06-14 ucrt)
+The script includes simulated data to demonstrate and reproduce the full machine learning workflow.  
+
+### ⚠️ Requirements
+Before running the ML script, run the requirements script to install all necessary libraries.  
+R version: 4.4.1 (2024-06-14 ucrt)
 
 ## 📄 More details about this research can be found on its pre-print form, which is published in [medRxiv](https://doi.org/10.1101/2025.01.23.25321010)
