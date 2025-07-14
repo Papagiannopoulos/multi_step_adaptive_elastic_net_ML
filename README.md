@@ -1,8 +1,8 @@
-# Sex-specific metabolic signatures of adiposity associated with clinical biomarkers in the UK Biobank
+# Sex-stratified metabolic signatures of adiposity indices and their associations with clinical biomarkers in the UK Biobank
 
 📦 This repository contains code associated with the
 - **Machine Learning** (ML) development
-- **parallelization across CPU cores** to reduce runtime)  
+- **parallelization across CPU cores** to reduce runtime  
 for my first PhD research project.
 
 ## Project Summary
@@ -23,4 +23,4 @@ The script includes simulated data to demonstrate and reproduce the full machine
 - Before running the ML script, run the requirements script to install all necessary libraries.  
 - R version: 4.4.1 (2024-06-14 ucrt)
 
-## 📄 More details about this research can be found on its pre-print form, which is published in [medRxiv](https://doi.org/10.1101/2025.01.23.25321010)
+### 📄 More details about this research can be found on its pre-print form, which is published in [medRxiv](https://doi.org/10.1101/2025.01.23.25321010)
