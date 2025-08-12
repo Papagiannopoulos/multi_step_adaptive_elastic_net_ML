@@ -23,4 +23,4 @@ The script includes simulated data to demonstrate and reproduce the full machine
 - Before running the ML script, run the requirements script to install all necessary libraries.  
 - R version: 4.4.1 (2024-06-14 ucrt)
 
-### 📄 More details about this research can be found on its pre-print form, which is published in [medRxiv](https://doi.org/10.1101/2025.01.23.25321010)
+### 📄 More details about the research can be found on its published form, at [eBioMedicine](https://www.thelancet.com/journals/ebiom/article/PIIS2352-3964(25)00312-3/fulltext)
