@@ -1,9 +1,8 @@
 # Sex-stratified metabolic signatures of adiposity indices and their associations with clinical biomarkers in the UK Biobank
 
-📦 This repository contains code associated with the
+📦 This repository contains code associated with the:
 - **Machine Learning** (ML) development
-- **parallelization across CPU cores** to reduce runtime  
-for my first PhD research project.
+- **Parallelization across CPU cores** to reduce runtime  
 
 ## Project Summary
 In this research I identified Metabolic Signatures of eight adiposity indices using a multi-step estimation algorithm built upon adaptive elastic-net regularization ([doi](http://dx.doi.org/10.1080/00949655.2015.1016944)) with stability selection.    
