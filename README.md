@@ -18,6 +18,9 @@ Access to the UK Biobank is available through: **http://www.ukbiobank.ac.uk**
 ## 🔁 **Reproducibility**
 The script includes simulated data to demonstrate and reproduce the full machine learning workflow.  
 
+## LICENCE
+© 2025 Christos Papagiannopoulos — Licensed under GPL-3.0 — Attribution required.
+
 ## ⚠️ Requirements
 - Before running the ML script, run the requirements script to install all necessary libraries.  
 - R version: 4.4.1 (2024-06-14 ucrt)
